@@ -1,55 +1,64 @@
 <div class="signup-container">
   <div class="tree-silhouette"></div>
-
+ 
   <div class="main-card">
-
-    <div class="start-label"></div>
-    <h1 class="main-heading">Welcome Back<span class="dot">.</span></h1>
-    <div class="login-link">Don't have an account? <a href="#" routerLink="/register">Sign Up</a></div>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-
+ 
+    <!-- ❌ Close Icon -->
+    <span class="close-btn" (click)="goHome()">✖</span>
+ 
+    <h1 class="main-heading">Admin Login<span class="dot">.</span></h1>
+ 
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+     
+      <!-- Email -->
       <div class="form-group mb-3">
         <label class="form-label">Email</label>
         <input
           type="email"
           class="form-control"
-          formControlName="email"
-          [class.is-invalid]="email?.invalid && email?.touched">
+          placeholder="Enter admin email"
+          formControlName="username"
+          [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+        />
         <span class="input-icon">✉️</span>
-        <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+        <div class="invalid-feedback" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
           Valid email is required
         </div>
       </div>
-
+ 
+      <!-- Password -->
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input
-          [type]="passwordVisible ? 'text' : 'password'"
-          class="form-control password-field"
-          formControlName="password"
-          [class.is-invalid]="password?.invalid && password?.touched">
-        <span class="password-toggle" (click)="togglePasswordVisibility()">
-          <i class="bi {{ passwordVisible ? 'bi-eye-slash' : 'bi-eye' }}"></i>
-        </span>
-        <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
+        <div class="position-relative">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            placeholder="Enter password"
+            formControlName="password"
+            [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          />
+          <span class="password-toggle" (click)="togglePassword()">
+            <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+          </span>
+        </div>
+ 
+        <div class="invalid-feedback" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
           Password must be at least 6 characters
         </div>
       </div>
-
+ 
+      <!-- Button -->
       <div class="button-group">
-        <button type="submit" class="btn-primary-custom full-width">
-          Sign In
+        <button type="submit" class="btn-primary-custom full-width" [disabled]="loginForm.invalid">
+          Login
         </button>
       </div>
+ 
     </form>
-
-    <div class="corner-logo">
-      <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15 15 L25 25 L15 35 L25 45" stroke="white" stroke-width="3" stroke-linecap="round"/>
-        <path d="M30 15 L40 25 L30 35 L40 45" stroke="white" stroke-width="3" stroke-linecap="round"/>
-        <path d="M45 15 L45 45" stroke="white" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-    </div>
+ 
   </div>
 </div>
+ 
+
+ 
+ 

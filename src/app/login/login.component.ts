@@ -1,58 +1,56 @@
-import { Component, OnInit, EventEmitter } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AdminService } from '../admin.service';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
+ 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css']
 })
-
-export class LoginComponent implements OnInit {
-  loginForm: FormGroup;
-  passwordVisible: boolean = false;
-
-  constructor(private fb: FormBuilder) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+export class LoginComponent {
+ 
+  showPassword = false;
+ 
+  constructor(
+    private fb: FormBuilder,
+    private adminService: AdminService,
+    private router: Router
+  ) {}
+ 
+  loginForm = this.fb.group({
+    username: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+ 
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+ 
+  // ✅ CROSS BUTTON FUNCTION
+  goHome() {
+    this.router.navigate(['/']);
+  }
+ 
+  onSubmit() {
+    if (this.loginForm.invalid) return;
+ 
+    this.adminService.login(this.loginForm.value).subscribe({
+      next: (res) => {
+        alert("Login Successful");
+ 
+        if (res.token) {
+          localStorage.setItem("adminToken", res.token);
+        }
+ 
+        this.router.navigate(['/admin']);
+      },
+      error: () => {
+        alert("Invalid Username or Password");
+      }
     });
-  }
-
-  ngOnInit(): void {}
-
-  togglePasswordVisibility(): void {
-    this.passwordVisible = !this.passwordVisible;
-  }
-
-
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      console.log('Form submitted:', this.loginForm.value);
-      // Add your login logic here
-    } else {
-      console.log('Form is invalid');
-      this.markFormGroupTouched(this.loginForm);
-    }
-  }
-
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
-      const control = formGroup.get(key);
-      control?.markAsTouched();
-    });
-  }
-
-  get email() {
-    return this.loginForm.get('email');
-  }
-
-  get password() {
-    return this.loginForm.get('password');
   }
 }
-
-
