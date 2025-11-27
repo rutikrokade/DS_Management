@@ -1,95 +1,73 @@
 import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { TeacherService } from '../../../teacher.service';
 
 @Component({
   selector: 'app-teacher-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './teacher-management.component.html',
   styleUrls: ['./teacher-management.component.css']
 })
 export class TeacherManagementComponent {
-  teachers = [
-    { id: 1, loginId: 'TCH001', username: 'ankit123', password: '123456', email: 'ankit@gmail.com', phone: '9876543210' },
-    { id: 2, loginId: 'TCH002', username: 'pooja456', password: 'abcdef', email: 'pooja@gmail.com', phone: '8765432109' }
-  ];
 
   showModal = false;
-  showDeleteConfirm = false;
-  showPassword = false;
-  showSuccess = false;
-  successMessage = '';
+  teacherForm: FormGroup;
 
-  isEditMode = false;
-  editId: number | null = null;
-  deleteId: number | null = null;
+  constructor(
+    private fb: FormBuilder,
+    private teacherService: TeacherService
+  ) {
+    this.teacherForm = this.fb.group({
+      userId: [null, Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', Validators.required],
+      qualification: ['', Validators.required],
+      experienceYears: [null, Validators.required],
+      gender: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
+      classIds: [[]],     // List of Long
+      sectionIds: [[]],   // List of Long
+      assignedAsClassTeacher: [false],
+      classTeacherId: [null]
+    });
+  }
 
-  newTeacher = { loginId: '', username: '', password: '', email: '', phone: '' };
-
-  // ✅ Open Add/Edit Modal
-  openModal(editTeacher: any = null) {
-    if (editTeacher) {
-      this.isEditMode = true;
-      this.editId = editTeacher.id;
-      this.newTeacher = { ...editTeacher };
-    } else {
-      this.isEditMode = false;
-      this.newTeacher = { loginId: '', username: '', password: '', email: '', phone: '' };
-    }
+  openModal() {
     this.showModal = true;
   }
 
-  // ✅ Close Modal
   closeModal() {
     this.showModal = false;
+    this.teacherForm.reset();
   }
 
-  // ✅ Add or Update Teacher
-  saveTeacher() {
-    if (this.isEditMode && this.editId !== null) {
-      const index = this.teachers.findIndex(t => t.id === this.editId);
-      if (index !== -1) this.teachers[index] = { id: this.editId, ...this.newTeacher };
-      this.showPopup('Teacher updated successfully!');
-    } else {
-      const newId = this.teachers.length ? this.teachers[this.teachers.length - 1].id + 1 : 1;
-      this.teachers.push({ id: newId, ...this.newTeacher });
-      this.showPopup('Teacher added successfully!');
+  onSubmit() {
+    if (this.teacherForm.invalid) {
+      this.teacherForm.markAllAsTouched();
+      return;
     }
-    this.closeModal();
-  }
 
-  // ✅ Open Delete Confirmation
-  confirmDelete(id: number) {
-    this.deleteId = id;
-    this.showDeleteConfirm = true;
-  }
-
-  // ✅ Delete Teacher
-  deleteTeacher() {
-    if (this.deleteId !== null) {
-      this.teachers = this.teachers.filter(t => t.id !== this.deleteId);
-      this.showPopup('Teacher deleted successfully!');
+    // Convert single number to list if needed
+    if (typeof this.teacherForm.value.classIds === 'number') {
+      this.teacherForm.value.classIds = [this.teacherForm.value.classIds];
     }
-    this.showDeleteConfirm = false;
-    this.deleteId = null;
-  }
+    if (typeof this.teacherForm.value.sectionIds === 'number') {
+      this.teacherForm.value.sectionIds = [this.teacherForm.value.sectionIds];
+    }
 
-  cancelDelete() {
-    this.showDeleteConfirm = false;
-  }
-
-  // ✅ Toggle password visibility
-  togglePassword() {
-    this.showPassword = !this.showPassword;
-  }
-
-  // ✅ Show success popup
-  showPopup(message: string) {
-    this.successMessage = message;
-    this.showSuccess = true;
-    setTimeout(() => {
-      this.showSuccess = false;
-    }, 3000);
+    this.teacherService.addTeacher(this.teacherForm.value).subscribe({
+      next: () => {
+        alert('Teacher Added Successfully');
+        this.closeModal();
+      },
+      error: (err) => {
+        console.error('Backend Error:', err);
+        alert('Error adding teacher. Check console for details.');
+      }
+    });
   }
 }
