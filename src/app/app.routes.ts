@@ -70,6 +70,7 @@ import { TimetableComponent } from './dashboard/teacher-dashboard/timetable/time
 import { StudentTimetableComponent } from './dashboard/student-dashboard/student-timetable/student-timetable.component';
 import { ParentsTimetableComponent } from './dashboard/parent-dashboard/parents-timetable/parents-timetable.component';
 import { ClassSectionComponent } from './dashboard/admin-dashboard/class-section/class-section.component';
+import { StatusComponent } from './status/status.component';
 
 
 export const routes: Routes = [
@@ -79,6 +80,7 @@ export const routes: Routes = [
   // Login
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+   { path: 'status', component:StatusComponent },
 
   {
     path: 'admin',
@@ -95,6 +97,8 @@ export const routes: Routes = [
       { path: 'exam-planner', component: ExamPlannerComponent },
       { path: 'content-management', component: ContentManagementComponent },
       { path: 'class-Section', component:ClassSectionComponent },
+     
+
 
 
     ],

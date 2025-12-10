@@ -1,0 +1,44 @@
+<h2 class="text-center">Users Status</h2>
+
+<table class="table table-bordered mt-3">
+  <thead>
+    <tr>
+      <th>User ID</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Current Status</th>
+      <th>Approved</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let u of users">
+      <td>{{ u.userId }}</td>
+      <td>{{ u.username }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.role }}</td>
+      <td>{{ u.status }}</td>
+      <td>{{ u.approved }}</td>
+
+      <td>
+        <button 
+          class="btn btn-success me-2" 
+          (click)="approve(u.userId)"
+          [disabled]="u.approved === true"
+        >
+          Approve
+        </button>
+
+        <button 
+          class="btn btn-danger" 
+          (click)="reject(u.userId)"
+          [disabled]="u.approved === false"
+        >
+          Reject
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
