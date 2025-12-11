@@ -24,7 +24,7 @@ import { StudentGradesComponent } from './dashboard/student-dashboard/student-gr
 import { StudentMyCourseComponent } from './dashboard/student-dashboard/student-my-course/student-my-course.component';
 import { StudentSttendLiveclassesComponent } from './dashboard/student-dashboard/student-sttend-liveclasses/student-sttend-liveclasses.component';
 import { StudentSubmitassignmentComponent } from './dashboard/student-dashboard/student-submitassignment/student-submitassignment.component';
-import { RegisterComponent } from './register/register.component';
+
 
 import { AttendenceComponent } from './dashboard/parent-dashboard/attendence/attendence.component';
 import { FeeRemindersComponent } from './dashboard/parent-dashboard/fee-reminders/fee-reminders.component';
@@ -73,6 +73,9 @@ import { ClassSectionComponent } from './dashboard/admin-dashboard/class-section
 import { StatusComponent } from './status/status.component';
 
 
+import { RegisterComponent } from './register/register.component';
+
+
 export const routes: Routes = [
   // Home
   { path: '', component: HomeComponent, title: 'Home | Digital Classroom' },
@@ -84,6 +87,7 @@ export const routes: Routes = [
 
   {
     path: 'admin',
+  
     component: AdminDashboardComponent,
     children: [
       { path: '', redirectTo: 'main-content', pathMatch: 'full' },
@@ -97,6 +101,7 @@ export const routes: Routes = [
       { path: 'exam-planner', component: ExamPlannerComponent },
       { path: 'content-management', component: ContentManagementComponent },
       { path: 'class-Section', component:ClassSectionComponent },
+      
      
 
 
@@ -105,6 +110,8 @@ export const routes: Routes = [
   },
   {
     path: 'student',
+   
+
     component: StudentDashboardComponent,
     children: [
       { path: '', redirectTo: 'main-content-student', pathMatch: 'full' },
@@ -120,6 +127,7 @@ export const routes: Routes = [
   },
   {
     path: 'parent',
+   
     component: ParentDashboardComponent,
     children: [
       { path: '', redirectTo: 'main-content-parent', pathMatch: 'full' },
@@ -134,6 +142,7 @@ export const routes: Routes = [
 
   {
     path: 'teacher',
+  
     component: TeacherDashboardComponent,
     children: [
       { path: '', redirectTo: 'main-content-teacher', pathMatch: 'full' },

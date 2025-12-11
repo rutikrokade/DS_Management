@@ -13,5 +13,4 @@ export class AdminService {
  
   login(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/login`, data);
-  }
-}
+  }     }

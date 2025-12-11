@@ -1,46 +1,51 @@
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class registerService {
-
   private baseUrl = 'http://localhost:8090/api/user';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  // REGISTER
-  registerUser(data: any) {
-    const headers = this.getAuthHeader();
+  // ⭐ REGISTER — ADMIN TOKEN REQUIRED
+  registerUser(data: any): Observable<any> {
+    const headers = this.getAuthHeader().set('Content-Type', 'application/json');
     return this.http.post(`${this.baseUrl}/create`, data, { headers });
   }
 
-  // GET ALL USERS
-  getAllUsers() {
+  // ⭐ GET ALL USERS — ADMIN TOKEN REQUIRED
+  getAllUsers(): Observable<any> {
     const headers = this.getAuthHeader();
     return this.http.get(`${this.baseUrl}/all`, { headers });
   }
 
-  // UPDATE STATUS → APPROVED / REJECTED
-  updateStatus(id: number, status: string) {
-    const headers = this.getAuthHeader();
-    const body = { status: status };
-
-    // ⭐ MOST IMPORTANT FIX → responseType: 'text'
-    return this.http.put(
-      `${this.baseUrl}/status/${id}`,
-      body,
-      { headers, responseType: 'text' }
-    );
+  // ⭐ UPDATE STATUS — ADMIN TOKEN REQUIRED
+  updateStatus(id: number, status: string, approved: boolean): Observable<any> {
+    const headers = this.getAuthHeader().set('Content-Type', 'application/json');
+    const body = { status, approved };
+    return this.http.put(`${this.baseUrl}/status/${id}`, body, { headers });
   }
 
-  // COMMON TOKEN HEADER
-  private getAuthHeader() {
-    const token = localStorage.getItem('adminToken');
+  private getAuthHeader(): HttpHeaders {
+    let headers = new HttpHeaders();
 
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+    if (this.isBrowser()) {
+      const token = localStorage.getItem('adminToken'); // ⭐ ADMIN token
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+    return headers;
+  }
+
+  private isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
   }
 }

@@ -15,27 +15,33 @@
 
   <tbody>
     <tr *ngFor="let u of users">
-      <td>{{ u.userId }}</td>
+      <td>{{ u.userId ?? u.id }}</td>
       <td>{{ u.username }}</td>
       <td>{{ u.email }}</td>
       <td>{{ u.role }}</td>
-      <td>{{ u.status }}</td>
-      <td>{{ u.approved }}</td>
+
+      <!-- show friendly status -->
+      <td>{{ u.status || 'UNKNOWN' }}</td>
+
+      <!-- show Approved as Yes/No -->
+      <td>
+        <span *ngIf="u.approved === true">Yes</span>
+        <span *ngIf="u.approved === false">No</span>
+        <span *ngIf="u.approved == null">—</span>
+      </td>
 
       <td>
         <button 
           class="btn btn-success me-2" 
-          (click)="approve(u.userId)"
-          [disabled]="u.approved === true"
-        >
+          (click)="approve(u)"
+          [disabled]="u.approved === true || u.status === 'ACTIVE'">
           Approve
         </button>
 
         <button 
           class="btn btn-danger" 
-          (click)="reject(u.userId)"
-          [disabled]="u.approved === false"
-        >
+          (click)="reject(u)"
+          [disabled]="u.approved === false || u.status === 'INACTIVE'">
           Reject
         </button>
       </td>

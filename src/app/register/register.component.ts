@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { registerService } from '../register.service';
 import { HttpClientModule } from '@angular/common/http';
-
+ 
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -11,13 +11,13 @@ import { HttpClientModule } from '@angular/common/http';
   templateUrl: './register.component.html'
 })
 export class RegisterComponent implements OnInit {
-
+ 
   registerForm!: FormGroup;
-
+ 
   roles = ['ADMIN', 'PARENT', 'TEACHER', 'STUDENT'];
-
+ 
   constructor(private fb: FormBuilder, private registerService: registerService) {}
-
+ 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
@@ -26,13 +26,13 @@ export class RegisterComponent implements OnInit {
       role: ['', Validators.required]
     });
   }
-
+ 
   registerUser() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
-
+ 
     this.registerService.registerUser(this.registerForm.value).subscribe(
       (res: any) => {
         alert("User Created Successfully!");
@@ -46,3 +46,4 @@ export class RegisterComponent implements OnInit {
     );
   }
 }
+ 
