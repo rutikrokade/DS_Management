@@ -8,153 +8,143 @@ interface Subject {
   subjectName: string;
   subjectCode: string;
   classId?: number;
+  className?: string;
   teacherId?: number;
+  teacherName?: string;
   description?: string;
   maxMarks?: number;
   isActive?: boolean;
-}
-
-interface SchoolClass {
-  classId: number;
-  className: string;
-}
-
-interface Teacher {
-  teacherId: number;
-  teacherName: string;
 }
 
 @Component({
   selector: 'app-subject-management',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './subject-management.component.html'
+  templateUrl: './subject-management.component.html',
+  styleUrls: ['./subject-management.component.css']
 })
 export class SubjectManagementComponent implements OnInit {
 
   subjects: Subject[] = [];
-  classes: SchoolClass[] = [];
-  teachers: Teacher[] = [];
-
   isEditMode = false;
   showToast = false;
   toastMessage = '';
+  showModal = false;
 
   newSubject: Subject = {
     subjectName: '',
     subjectCode: '',
+    classId: undefined,
+    teacherId: undefined,
+    description: '',
+    maxMarks: 0,
     isActive: true
   };
 
   private SUBJECT_API = 'http://localhost:8090/api/admin/subjects';
-  private CLASS_API = 'http://localhost:8090/api/class/fetch-all';
-  private TEACHER_API = 'http://localhost:8090/api/teacher/fetch-all';
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadSubjects();
-    this.loadClasses();
-    this.loadTeachers();
   }
 
-  /* ================= LOAD DATA ================= */
-
+  /* ================= LOAD SUBJECTS ================= */
   loadSubjects() {
-    this.http.get<any>(this.SUBJECT_API).subscribe({
-      next: res => {
-        const list = Array.isArray(res) ? res : res.data ?? [];
-
-        // 🔥 map nested class & teacher
-        this.subjects = list.map((s: any) => ({
-          subjectId: s.subjectId,
-          subjectName: s.subjectName,
-          subjectCode: s.subjectCode,
-          classId: s.class?.classId,
-          teacherId: s.teacher?.teacherId,
-          maxMarks: s.maxMarks,
-          isActive: s.isActive
-        }));
-      },
-      error: err => console.error(err)
+    this.http.get<Subject[]>(this.SUBJECT_API).subscribe({
+      next: res => this.subjects = Array.isArray(res) ? res : [],
+      error: err => console.error('Load subjects error:', err)
     });
   }
 
-  loadClasses() {
-    this.http.get<any>(this.CLASS_API).subscribe(res => {
-      this.classes = Array.isArray(res) ? res : res.data ?? [];
-    });
-  }
+  /* ================= MODAL CONTROLS ================= */
+  openModal() {
+  this.showModal = true;
+}
 
-  loadTeachers() {
-    this.http.get<any>(this.TEACHER_API).subscribe(res => {
-      const list = Array.isArray(res) ? res : res.data ?? [];
-      this.teachers = list.map((t: any) => ({
-        teacherId: t.teacherId ?? t.id,
-        teacherName: t.teacherName ?? t.name
-      }));
-    });
-  }
+closeModal() {
+  this.showModal = false;
+  this.resetForm();
+}
 
-  /* ================= CRUD ================= */
-
+  /* ================= SAVE / UPDATE SUBJECT ================= */
   saveSubject() {
-    const payload = {
-      ...this.newSubject,
-      class: { classId: this.newSubject.classId },
-      teacher: { teacherId: this.newSubject.teacherId }
-    };
+    if (!this.newSubject.subjectName || !this.newSubject.subjectCode || !this.newSubject.classId || !this.newSubject.teacherId) {
+      this.showMsg('Please fill all required fields');
+      return;
+    }
 
-    const req = this.isEditMode
-      ? this.http.put(`${this.SUBJECT_API}/${this.newSubject.subjectId}`, payload)
-      : this.http.post(this.SUBJECT_API, payload);
-
-    req.subscribe(() => {
-      this.showMsg(this.isEditMode ? 'Subject updated' : 'Subject added');
-      this.resetForm();
-      this.loadSubjects();
-    });
+    if (this.isEditMode && this.newSubject.subjectId) {
+      this.http.put<Subject>(`${this.SUBJECT_API}/${this.newSubject.subjectId}`, this.newSubject)
+        .subscribe({
+          next: res => {
+            this.showMsg('Subject updated successfully');
+            this.closeModal();
+            this.loadSubjects();
+          },
+          error: err => {
+            console.error('Update error:', err);
+            this.showMsg('Error updating subject');
+          }
+        });
+    } else {
+      this.http.post<Subject>(this.SUBJECT_API, this.newSubject)
+        .subscribe({
+          next: res => {
+            this.showMsg('Subject added successfully');
+            this.closeModal();
+            this.loadSubjects();
+          },
+          error: err => {
+            console.error('Add error:', err);
+            this.showMsg('Error adding subject');
+          }
+        });
+    }
   }
 
+  /* ================= EDIT SUBJECT ================= */
   editSubject(subject: Subject) {
     this.newSubject = { ...subject };
     this.isEditMode = true;
+    this.openModal();
   }
 
-  cancelEdit() {
-    this.resetForm();
-  }
-
+  /* ================= DELETE SUBJECT ================= */
   deleteSubject(id?: number) {
     if (!id) return;
-    this.http.delete(`${this.SUBJECT_API}/${id}`).subscribe(() => {
-      this.showMsg('Subject deleted');
-      this.loadSubjects();
+    if (!confirm('Are you sure you want to delete this subject?')) return;
+
+    this.http.delete(`${this.SUBJECT_API}/${id}`).subscribe({
+      next: () => {
+        this.showMsg('Subject deleted successfully');
+        this.loadSubjects();
+      },
+      error: err => {
+        console.error('Delete error:', err);
+        this.showMsg('Error deleting subject');
+      }
     });
   }
 
+  /* ================= RESET FORM ================= */
   resetForm() {
     this.isEditMode = false;
     this.newSubject = {
       subjectName: '',
       subjectCode: '',
+      classId: undefined,
+      teacherId: undefined,
+      description: '',
+      maxMarks: 0,
       isActive: true
     };
   }
 
+  /* ================= TOAST ================= */
   showMsg(msg: string) {
     this.toastMessage = msg;
     this.showToast = true;
-    setTimeout(() => (this.showToast = false), 2500);
-  }
-
-  /* ================= DISPLAY HELPERS ================= */
-
-  getClassName(id?: number) {
-    return this.classes.find(c => c.classId === id)?.className || '-';
-  }
-
-  getTeacherName(id?: number) {
-    return this.teachers.find(t => t.teacherId === id)?.teacherName || '-';
+    setTimeout(() => (this.showToast = false), 3000);
   }
 }

@@ -1,38 +1,55 @@
-.text-blue {
-  color: #fdc50d;
+/* Table alignment */
+table th, table td {
+  vertical-align: middle;
+  text-align: center;
 }
 
-.text-yellow {
-  color: #FFD700;
+/* Buttons minimum width */
+.btn {
+  min-width: 70px;
 }
 
-.btn-blue {
-  background-color: #0d6efd;
+/* Modal backdrop */
+.modal-backdrop {
+  z-index: 1040;
+}
+
+/* Toast container */
+.toast-container {
+  z-index: 1100;
+}
+/* Table styling */
+table {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+table th, table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+table th {
+  background-color: #343a40; /* Dark header */
   color: #fff;
-  border: none;
 }
 
-.btn-blue:hover {
-  background-color: #084298;
+table tbody tr:hover {
+  background-color: #f2f2f2; /* Hover highlight */
 }
 
-.btn-black {
-  background-color: #000;
-  color: #fff;
-  border: none;
+/* Buttons min-width for consistency */
+.btn-sm {
+  min-width: 70px;
 }
 
-.btn-black:hover {
-  background-color: #333;
+/* Add subject button */
+.btn-primary {
+  font-weight: 500;
 }
 
-.input-yellow {
-  background-color: #fff8dc;
-  border: 1px solid #FFD700;
-  color: #000;
-}
-
-.table-dark th {
-  background-color: #FFD700 !important;
-  color: #141102 !important;
+/* Badges styling */
+.badge {
+  font-size: 0.9rem;
+  padding: 0.35em 0.65em;
 }

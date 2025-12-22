@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
- 
+
 declare var bootstrap: any;
- 
+
 @Component({
   selector: 'app-teacher-management',
   standalone: true,
@@ -12,33 +12,34 @@ declare var bootstrap: any;
   templateUrl: './teacher-management.component.html'
 })
 export class TeacherManagementComponent implements OnInit {
- 
+
   teacherForm!: FormGroup;
+
   teachers: any[] = [];
- 
+  classes: any[] = [];
+  sections: any[] = [];
+
   editMode = false;
   editingTeacherId: number | null = null;
- 
-  loading = false;
-  successMessage = '';
-  errorMessage = '';
- 
+
   toastMessage = '';
-  toastType: 'success' | 'error' = 'success';
- 
- 
+errorMessage: any;
+successMessage: any;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient
   ) {}
- 
+
+  // ================= INIT =================
   ngOnInit(): void {
     this.initForm();
     this.loadTeachers();
+    this.loadClasses();
     this.handleClassTeacherToggle();
   }
- 
-  // ---------------- FORM INIT ----------------
+
+  // ================= FORM =================
   initForm() {
     this.teacherForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -49,78 +50,86 @@ export class TeacherManagementComponent implements OnInit {
       experienceYears: [0, [Validators.required, Validators.min(0)]],
       gender: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
- 
+
       assignedAsClassTeacher: [false],
       classId: [null],
       sectionId: [null]
     });
   }
- 
-  // ---------------- CHECKBOX HANDLER ----------------
+
+  // ================= CHECKBOX =================
   handleClassTeacherToggle() {
     this.teacherForm.get('assignedAsClassTeacher')?.valueChanges
       .subscribe((checked: boolean) => {
- 
+
         if (checked) {
           this.teacherForm.get('classId')?.setValidators(Validators.required);
           this.teacherForm.get('sectionId')?.setValidators(Validators.required);
         } else {
- 
-          // ❗ ONLY clear in CREATE mode
           if (!this.editMode) {
-            this.teacherForm.patchValue({
-              classId: null,
-              sectionId: null
-            });
+            this.teacherForm.patchValue({ classId: null, sectionId: null });
           }
- 
+          this.sections = [];
           this.teacherForm.get('classId')?.clearValidators();
           this.teacherForm.get('sectionId')?.clearValidators();
         }
- 
+
         this.teacherForm.get('classId')?.updateValueAndValidity();
         this.teacherForm.get('sectionId')?.updateValueAndValidity();
       });
   }
- 
-  // ---------------- LOAD ----------------
+
+  // ================= LOAD =================
   loadTeachers() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
- 
-    this.http.get<any[]>('http://localhost:8090/api/teacher/fetch-all', { headers })
-      .subscribe({
-        next: res => this.teachers = res,
-        error: err => console.error(err)
-      });
+    this.http.get<any[]>(
+      'http://localhost:8090/api/teacher/fetch-all',
+      { headers: this.authHeaders() }
+    ).subscribe(res => this.teachers = res);
   }
- 
-  // ---------------- CREATE MODAL ----------------
+
+  loadClasses() {
+    this.http.get<any[]>(
+      'http://localhost:8090/api/class/fetch-all',
+      { headers: this.authHeaders() }
+    ).subscribe(res => this.classes = res);
+  }
+
+  // ================= CLASS CHANGE =================
+  onClassChange(event: Event) {
+    const classId = Number((event.target as HTMLSelectElement).value);
+
+    if (!classId) {
+      this.sections = [];
+      this.teacherForm.patchValue({ sectionId: null });
+      return;
+    }
+
+    this.teacherForm.patchValue({ sectionId: null });
+
+    this.http.get<any[]>(
+      `http://localhost:8090/api/section/classes/${classId}/sections/fetch-all`,
+      { headers: this.authHeaders() }
+    ).subscribe(res => this.sections = res);
+  }
+
+  // ================= CREATE =================
   openCreateModal() {
     this.editMode = false;
     this.editingTeacherId = null;
- 
     this.teacherForm.reset({ assignedAsClassTeacher: false });
-    this.teacherForm.get('classId')?.enable();
-    this.teacherForm.get('sectionId')?.enable();
- 
-    const modal = new bootstrap.Modal(
+    this.sections = [];
+
+    new bootstrap.Modal(
       document.getElementById('teacherModal')!,
       { backdrop: 'static', keyboard: false }
-    );
-    modal.show();
+    ).show();
   }
- 
-  // ---------------- EDIT ----------------
+
+  // ================= EDIT =================
   editTeacher(teacher: any) {
     this.editMode = true;
     this.editingTeacherId = teacher.id;
- 
-    this.teacherForm.reset();
- 
-    // 🔥 VERY IMPORTANT
+
     this.teacherForm.patchValue({
       firstName: teacher.firstName,
       lastName: teacher.lastName,
@@ -131,134 +140,128 @@ export class TeacherManagementComponent implements OnInit {
       gender: teacher.gender,
       dateOfBirth: teacher.dateOfBirth,
       assignedAsClassTeacher: true,
-      classId: teacher.classId,
-      sectionId: teacher.sectionId
-    }, { emitEvent: false });
- 
-    // 🔒 IDs should not be editable in edit
-    this.teacherForm.get('classId')?.disable({ emitEvent: false });
-    this.teacherForm.get('sectionId')?.disable({ emitEvent: false });
- 
-    const modal = new bootstrap.Modal(
+      classId: teacher.classId
+    });
+
+    this.loadSectionsForEdit(teacher.classId, teacher.sectionId);
+
+    new bootstrap.Modal(
       document.getElementById('teacherModal')!,
       { backdrop: 'static', keyboard: false }
-    );
-    modal.show();
+    ).show();
   }
- 
-  // ---------------- SUBMIT ----------------
+
+  loadSectionsForEdit(classId: number, sectionId: number) {
+    this.http.get<any[]>(
+      `http://localhost:8090/api/section/classes/${classId}/sections/fetch-all`,
+      { headers: this.authHeaders() }
+    ).subscribe(res => {
+      this.sections = res;
+      this.teacherForm.patchValue({ sectionId });
+    });
+  }
+
+  // ================= SUBMIT =================
   onSubmit() {
-    this.successMessage = '';
-    this.errorMessage = '';
- 
     if (this.teacherForm.invalid) {
       this.teacherForm.markAllAsTouched();
       return;
     }
- 
-    this.loading = true;
- 
+
     const payload = this.teacherForm.getRawValue();
- 
+
     if (!payload.assignedAsClassTeacher) {
       delete payload.classId;
       delete payload.sectionId;
     }
- 
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
- 
+
     if (this.editMode && this.editingTeacherId) {
- 
-      // -------- UPDATE --------
       this.http.put(
         `http://localhost:8090/api/teacher/${this.editingTeacherId}`,
         payload,
-        { headers }
+        { headers: this.authHeaders(true) }
       ).subscribe({
         next: () => this.afterSuccess('Teacher updated successfully'),
-        error: err => this.handleError(err)
+        error: () => this.showToast('Update failed')
       });
- 
+
     } else {
- 
-      // -------- CREATE --------
       this.http.post(
         'http://localhost:8090/api/teacher',
         payload,
-        { headers }
+        { headers: this.authHeaders(true) }
       ).subscribe({
-        next: () => this.afterSuccess('Teacher created successfully'),
-        error: err => this.handleError(err)
+        next: (res: any) => {
+          this.editingTeacherId = res.id; // 🔥 new teacher id
+          this.afterSuccess('Teacher created successfully');
+        },
+        error: () => this.showToast('Create failed')
       });
     }
   }
- 
-  // ---------------- DELETE ----------------
-  deleteTeacher(id: number) {
-    if (!confirm('Are you sure you want to delete this teacher?')) return;
- 
-    const knownModal = bootstrap.Modal.getInstance(
-      document.getElementById('teacherModal')!
-    );
-    knownModal?.hide(); // 🔥 prevents black screen
- 
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
+
+  // ================= ASSIGN TEACHER =================
+  assignTeacherToClass() {
+    if (!this.teacherForm.value.assignedAsClassTeacher) return;
+
+    const classId = this.teacherForm.value.classId;
+    const sectionId = this.teacherForm.value.sectionId;
+    const teacherId = this.editingTeacherId;
+
+    if (!classId || !sectionId || !teacherId) return;
+
+    this.http.post(
+      `http://localhost:8090/api/teacher/classes/${classId}/sections/${sectionId}/assign`,
+      { teacherId },
+      { headers: this.authHeaders(true) }
+    ).subscribe({
+      next: () => this.showToast('Teacher assigned successfully'),
+      error: err =>
+        this.showToast(
+          err.status === 409 ? err.error.error : 'Assignment failed'
+        )
     });
- 
-    this.http.delete(`http://localhost:8090/api/teacher/${id}`, { headers })
-      .subscribe({
-        next: () => this.loadTeachers(),
-        error: err => console.error(err)
-      });
   }
- 
-  // ---------------- COMMON ----------------
+
+  // ================= DELETE =================
+  deleteTeacher(id: number) {
+    if (!confirm('Delete this teacher?')) return;
+
+    this.http.delete(
+      `http://localhost:8090/api/teacher/${id}`,
+      { headers: this.authHeaders() }
+    ).subscribe(() => this.loadTeachers());
+  }
+
+  // ================= COMMON =================
   afterSuccess(msg: string) {
-    this.loading = false;
-    this.showToast(msg, 'success');
- 
+    this.assignTeacherToClass(); // 🔥 FINAL STEP
+
+    this.showToast(msg);
     this.teacherForm.reset({ assignedAsClassTeacher: false });
-    this.teacherForm.get('classId')?.enable();
-    this.teacherForm.get('sectionId')?.enable();
- 
+    this.sections = [];
     this.editMode = false;
     this.editingTeacherId = null;
- 
     this.loadTeachers();
- 
+
     bootstrap.Modal.getInstance(
       document.getElementById('teacherModal')!
     )?.hide();
   }
- 
- handleError(err: any) {
-  this.loading = false;
-  console.error(err);
- 
-  this.showToast(
-    err.error?.error || 'Something went wrong',
-    'error'
-  );
-}
- 
-showToast(message: string, type: 'success' | 'error' = 'success') {
-  this.toastMessage = message;
- 
-  const toastEl = document.getElementById('appToast')!;
- 
-  toastEl.classList.remove('bg-success', 'bg-danger');
-  toastEl.classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
- 
-  const toast = new bootstrap.Toast(toastEl, {
-    delay: 3000
-  });
- 
-  toast.show();
-}
+
+  showToast(message: string) {
+    this.toastMessage = message;
+    new bootstrap.Toast(
+      document.getElementById('appToast')!,
+      { delay: 3000 }
+    ).show();
+  }
+
+  authHeaders(json = false) {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      ...(json && { 'Content-Type': 'application/json' })
+    });
+  }
 }

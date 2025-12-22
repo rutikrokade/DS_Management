@@ -175,27 +175,50 @@
           </div>
  
           <!-- CLASS & SECTION (ONLY IF CHECKED) -->
-         <div class="row"
-     [hidden]="!teacherForm.get('assignedAsClassTeacher')?.value">
- 
+    <div class="row"
+     *ngIf="teacherForm.get('assignedAsClassTeacher')?.value">
+
+  <!-- CLASS -->
   <div class="col-md-6 mb-3">
-    <label class="form-label">Class ID</label>
-    <input type="number"
-           class="form-control"
-           formControlName="classId"
-           [readonly]="editMode">
+    <label class="form-label fw-semibold">
+      <i class="bi bi-mortarboard-fill me-1 text-warning"></i>
+      Select Class
+    </label>
+
+   <select class="form-select"
+        formControlName="classId"
+        (change)="onClassChange($event)"
+        [attr.disabled]="editMode ? true : null">
+
+      <option value="">-- Choose Class --</option>
+      <option *ngFor="let c of classes" [value]="c.classId">
+        {{ c.className }}
+      </option>
+    </select>
   </div>
- 
+
+  <!-- SECTION -->
   <div class="col-md-6 mb-3">
-    <label class="form-label">Section ID</label>
-    <input type="number"
-           class="form-control"
-           formControlName="sectionId"
-           [readonly]="editMode">
+    <label class="form-label fw-semibold">
+      <i class="bi bi-diagram-3-fill me-1 text-warning"></i>
+      Select Section
+    </label>
+
+ <select class="form-select"
+        formControlName="sectionId"
+        [attr.disabled]="editMode ? true : null">
+
+      <option value="">-- Choose Section --</option>
+      <option *ngFor="let s of sections" [value]="s.sectionId">
+        {{ s.sectionName }}
+      </option>
+    </select>
   </div>
- 
+
 </div>
- 
+
+
+
         <!-- MODAL FOOTER -->
         <div class="modal-footer">
           <button type="button"
