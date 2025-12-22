@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 import { ChatboatComponent } from "../../pages/chatboat/chatboat.component";
+import { AuthService } from '../../auth.service';
+
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -11,4 +13,9 @@ import { ChatboatComponent } from "../../pages/chatboat/chatboat.component";
 })
 export class TeacherDashboardComponent {
 
+  constructor(private authService: AuthService) {}
+
+  logout() {
+    this.authService.logout();
+  }
 }

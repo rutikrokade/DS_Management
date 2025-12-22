@@ -74,6 +74,7 @@ import { StatusComponent } from './status/status.component';
 
 
 import { RegisterComponent } from './register/register.component';
+import { authGuard } from './guards/auth.guard';
 
 
 export const routes: Routes = [
@@ -86,76 +87,78 @@ export const routes: Routes = [
    { path: 'status', component:StatusComponent },
 
   {
-    path: 'admin',
-  
-    component: AdminDashboardComponent,
-    children: [
-      { path: '', redirectTo: 'main-content', pathMatch: 'full' },
-      { path: 'main-content', component: AdminHomeComponent },
-      { path: 'course-management', component: CourseManagementComponent },
-      { path: 'subject-management', component: SubjectManagementComponent },
-      { path: 'messages', component: MessageComponent },
-      { path: 'teacher-management', component: TeacherManagementComponent },
-      { path: 'student-management', component: StudentManagementComponent },
-      { path: 'parent-management', component: ParentManagementComponent },
-      { path: 'exam-planner', component: ExamPlannerComponent },
-      { path: 'content-management', component: ContentManagementComponent },
-      { path: 'class-Section', component:ClassSectionComponent },
-      
-     
+  path: 'admin',
+  component: AdminDashboardComponent,
+  canActivate: [authGuard],
+  data: { roles: ['ADMIN'] },
+  children: [
+    { path: '', redirectTo: 'main-content', pathMatch: 'full' },
+    { path: 'main-content', component: AdminHomeComponent },
+    { path: 'course-management', component: CourseManagementComponent },
+    { path: 'subject-management', component: SubjectManagementComponent },
+    { path: 'messages', component: MessageComponent },
+    { path: 'teacher-management', component: TeacherManagementComponent },
+    { path: 'student-management', component: StudentManagementComponent },
+    { path: 'parent-management', component: ParentManagementComponent },
+    { path: 'exam-planner', component: ExamPlannerComponent },
+    { path: 'content-management', component: ContentManagementComponent },
+    { path: 'class-Section', component: ClassSectionComponent },
+  ]
+},
 
-
-
-    ],
-  },
-  {
-    path: 'student',
-   
-
-    component: StudentDashboardComponent,
-    children: [
-      { path: '', redirectTo: 'main-content-student', pathMatch: 'full' },
-      { path: 'main-content-student', component: StudentHomeComponent },
-      { path: 'accessbook', component: StudentAccessbookComponent },
-      { path: 'attendance', component: StudentAttendanceComponent },
-      { path: 'grades', component: StudentGradesComponent },
-      { path: 'my-course', component: StudentMyCourseComponent },
-      { path: 'liveclasses', component: StudentSttendLiveclassesComponent },
-      { path: 'assignment', component: StudentSubmitassignmentComponent },
-      { path: 'timetable', component: StudentTimetableComponent},
-    ],
-  },
-  {
-    path: 'parent',
-   
-    component: ParentDashboardComponent,
-    children: [
-      { path: '', redirectTo: 'main-content-parent', pathMatch: 'full' },
-      { path: 'main-content-parent', component: ParentHomeComponent },
-      { path: 'attendence', component: AttendenceComponent },
-      { path: 'fee-reminders', component: FeeRemindersComponent },
-      { path: 'learning-progress', component: LearningProgressComponent },
-      { path: 'school-circulars', component: SchoolCircularsComponent },
-      { path: 'timetable', component: ParentsTimetableComponent},
-    ],
-  },
+ {
+  path: 'student',
+  component: StudentDashboardComponent,
+  canActivate: [authGuard],
+  data: { roles: ['STUDENT'] },
+  children: [
+    { path: '', redirectTo: 'main-content-student', pathMatch: 'full' },
+    { path: 'main-content-student', component: StudentHomeComponent },
+    { path: 'accessbook', component: StudentAccessbookComponent },
+    { path: 'attendance', component: StudentAttendanceComponent },
+    { path: 'grades', component: StudentGradesComponent },
+    { path: 'my-course', component: StudentMyCourseComponent },
+    { path: 'liveclasses', component: StudentSttendLiveclassesComponent },
+    { path: 'assignment', component: StudentSubmitassignmentComponent },
+    { path: 'timetable', component: StudentTimetableComponent },
+  ]
+},
 
   {
-    path: 'teacher',
-  
-    component: TeacherDashboardComponent,
-    children: [
-      { path: '', redirectTo: 'main-content-teacher', pathMatch: 'full' },
-      { path: 'main-content-teacher', component: TeacherHomeComponent },
-      { path: 'announcement', component: AnnouncementsComponent },
-      { path: 'attendance', component: TeacherAttendanceComponent },
-      { path: 'check-assignment', component: CheckAssignmentComponent },
-      { path: 'create-assignment', component: CreateAssignmentComponent },
-      { path: 'manage-student', component: ManageStudentComponent },
-      { path: 'student-progress', component: StudentProgressComponent },
-      { path: 'timetable', component: TimetableComponent},
-    ],
-  },
+  path: 'parent',
+  component: ParentDashboardComponent,
+  canActivate: [authGuard],
+  data: { roles: ['PARENT'] },
+  children: [
+    { path: '', redirectTo: 'main-content-parent', pathMatch: 'full' },
+    { path: 'main-content-parent', component: ParentHomeComponent },
+    { path: 'attendence', component: AttendenceComponent },
+    { path: 'fee-reminders', component: FeeRemindersComponent },
+    { path: 'learning-progress', component: LearningProgressComponent },
+    { path: 'school-circulars', component: SchoolCircularsComponent },
+    { path: 'timetable', component: ParentsTimetableComponent },
+  ]
+},
+
+
+{
+  path: 'teacher',
+  component: TeacherDashboardComponent,
+  canActivate: [authGuard],
+  data: { roles: ['TEACHER'] },
+  children: [
+    { path: '', redirectTo: 'main-content-teacher', pathMatch: 'full' },
+    { path: 'main-content-teacher', component: TeacherHomeComponent },
+    { path: 'announcement', component: AnnouncementsComponent },
+    { path: 'attendance', component: TeacherAttendanceComponent },
+    { path: 'check-assignment', component: CheckAssignmentComponent },
+    { path: 'create-assignment', component: CreateAssignmentComponent },
+    { path: 'manage-student', component: ManageStudentComponent },
+    { path: 'student-progress', component: StudentProgressComponent },
+    { path: 'timetable', component: TimetableComponent },
+  ]
+},
+
   { path: 'dashboard/teacher', component: OurTeacherComponent },
   { path: 'dashboard/parent', component: ParentDashboardComponent },
 

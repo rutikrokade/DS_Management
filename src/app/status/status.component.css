@@ -1,0 +1,29 @@
+.table-responsive {
+  border-radius: 12px;
+  background: #634c4c;
+}
+
+.table thead th {
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.badge {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .table td, .table th {
+    font-size: 13px;
+    padding: 10px;
+  }
+}

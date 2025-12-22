@@ -1,33 +1,45 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpHeaders } from '@angular/common/http';
+ 
 @Injectable({
   providedIn: 'root'
 })
 export class ClassSectionService {
-
+ 
   private classUrl = 'http://localhost:8090/api/class';
   private sectionUrl = 'http://localhost:8090/api/section';
-
+ 
   constructor(private http: HttpClient) {}
-
- private getHeaders() {
-  const token = localStorage.getItem('token');
-  return {
-    headers: new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    })
-  };
-}
-
-  // CREATE CLASS
+ 
+  private getHeaders() {
+    const token = localStorage.getItem('token'); // 🔥 Matches login.component now
+    return {
+      headers: new HttpHeaders({
+        Authorization: token ? `Bearer ${token}` : '',
+        'Content-Type': 'application/json'
+      })
+    };
+  }
+ 
+  // CLASS API
   createClass(data: any): Observable<any> {
     return this.http.post(this.classUrl, data, this.getHeaders());
   }
-
-  // CREATE SECTION
+ 
+  updateClass(classId: number, data: any): Observable<any> {
+    return this.http.put(`${this.classUrl}/${classId}`, data, this.getHeaders());
+  }
+ 
+  deleteClass(classId: number): Observable<any> {
+    return this.http.delete(`${this.classUrl}/${classId}`, this.getHeaders());
+  }
+ 
+  getAllClasses(): Observable<any> {
+    return this.http.get(`${this.classUrl}/fetch-all`, this.getHeaders());
+  }
+ 
+  // SECTION API
   createSection(classId: number, data: any): Observable<any> {
     return this.http.post(
       `${this.sectionUrl}/classes/${classId}/sections`,
@@ -35,8 +47,7 @@ export class ClassSectionService {
       this.getHeaders()
     );
   }
-
-  // UPDATE SECTION
+ 
   updateSection(sectionId: number, data: any): Observable<any> {
     return this.http.put(
       `${this.sectionUrl}/sections/${sectionId}`,
@@ -44,11 +55,17 @@ export class ClassSectionService {
       this.getHeaders()
     );
   }
-
-  // DELETE SECTION
+ 
   deleteSection(sectionId: number): Observable<any> {
     return this.http.delete(
       `${this.sectionUrl}/sections/${sectionId}`,
+      this.getHeaders()
+    );
+  }
+ 
+  getSectionsByClass(classId: number): Observable<any> {
+    return this.http.get(
+      `${this.sectionUrl}/classes/${classId}/sections/fetch-all`,
       this.getHeaders()
     );
   }

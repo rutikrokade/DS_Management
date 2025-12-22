@@ -1,70 +1,117 @@
 <div class="container mt-4">
 
-  <h3 class="text-blue mb-3">Subject Management</h3>
+  <h4 class="mb-3">Subject Management</h4>
 
-  <!-- Inline Form -->
-  <div class="card p-3 mb-4 shadow-sm border-0">
-    <div class="row g-3 align-items-end">
+  <!-- FORM -->
+  <div class="card p-3 mb-4">
+    <div class="row g-3">
 
       <div class="col-md-3">
-        <label class="form-label text-black">Subject Name</label>
-        <input type="text" class="form-control input-yellow" [(ngModel)]="newSubject.name" name="name">
+        <label>Subject Name</label>
+        <input class="form-control" [(ngModel)]="newSubject.subjectName">
+      </div>
+
+      <div class="col-md-2">
+        <label>Code</label>
+        <input class="form-control" [(ngModel)]="newSubject.subjectCode">
       </div>
 
       <div class="col-md-3">
-        <label class="form-label text-black">Subject Code</label>
-        <input type="text" class="form-control input-yellow" [(ngModel)]="newSubject.code" name="code">
+        <label>Class</label>
+        <select class="form-select" [(ngModel)]="newSubject.classId">
+          <option [ngValue]="undefined">Select</option>
+          <option *ngFor="let c of classes" [ngValue]="c.classId">
+            {{ c.className }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label>Teacher</label>
+        <select class="form-select" [(ngModel)]="newSubject.teacherId">
+          <option [ngValue]="undefined">Select</option>
+          <option *ngFor="let t of teachers" [ngValue]="t.teacherId">
+            {{ t.teacherName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label>Max Marks</label>
+        <input type="number" class="form-control" [(ngModel)]="newSubject.maxMarks">
       </div>
 
       <div class="col-md-4">
-        <label class="form-label text-black">Description</label>
-        <input type="text" class="form-control input-yellow" [(ngModel)]="newSubject.description" name="description">
+        <label>Description</label>
+        <input class="form-control" [(ngModel)]="newSubject.description">
       </div>
 
-      <div class="col-md-2 d-flex">
-        <button class="btn btn-blue me-2" (click)="addSubject()">
+      <div class="col-md-2 d-flex align-items-center mt-4">
+        <input type="checkbox" class="form-check-input me-2"
+               [(ngModel)]="newSubject.isActive">
+        Active
+      </div>
+
+      <div class="col-md-3 mt-4">
+        <button class="btn btn-primary me-2" (click)="saveSubject()">
           {{ isEditMode ? 'Update' : 'Add' }}
         </button>
-        <button *ngIf="isEditMode" class="btn btn-black" (click)="cancelEdit()">Cancel</button>
+        <button *ngIf="isEditMode"
+                class="btn btn-secondary"
+                (click)="cancelEdit()">
+          Cancel
+        </button>
       </div>
 
     </div>
   </div>
 
-  <!-- Subject Table -->
-  <div class="card shadow-sm border-0">
-    <div class="card-header text-white fw-bold table-heading bg-black">
-      Subject List
-    </div>
-    <div class="table-responsive">
-      <table class="table table-hover align-middle text-center mb-0">
-        <thead class="table-dark text-yellow">
-          <tr>
-            <th>#</th>
-            <th>Subject Name</th>
-            <th>Code</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let subject of subjects; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td><strong>{{ subject.name }}</strong></td>
-            <td>{{ subject.code }}</td>
-            <td>{{ subject.description }}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-warning me-1" (click)="editSubject(subject, i)">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" (click)="deleteSubject(i)">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <!-- TABLE -->
+  <table class="table table-bordered table-hover text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>Name</th>
+        <th>Code</th>
+        <th>Class</th>
+        <th>Teacher</th>
+        <th>Marks</th>
+        <th>Active</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let subject of subjects">
+        <td>{{ subject.subjectName }}</td>
+        <td>{{ subject.subjectCode }}</td>
+        <td>{{ getClassName(subject.classId) }}</td>
+        <td>{{ getTeacherName(subject.teacherId) }}</td>
+        <td>{{ subject.maxMarks || '-' }}</td>
+
+        <td>
+          <span class="badge"
+                [ngClass]="subject.isActive ? 'bg-success' : 'bg-danger'">
+            {{ subject.isActive ? 'Yes' : 'No' }}
+          </span>
+        </td>
+
+        <td>
+          <button class="btn btn-sm btn-warning me-1"
+                  (click)="editSubject(subject)">
+            Edit
+          </button>
+          <button class="btn btn-sm btn-danger"
+                  (click)="deleteSubject(subject.subjectId)">
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TOAST -->
+  <div class="toast position-fixed bottom-0 end-0 m-3 show" *ngIf="showToast">
+    <div class="toast-body">{{ toastMessage }}</div>
   </div>
 
 </div>

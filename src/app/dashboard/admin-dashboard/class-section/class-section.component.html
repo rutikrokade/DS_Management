@@ -1,59 +1,73 @@
 <div class="container mt-4">
-
-  <h2 class="text-center mb-4">Class & Section Management</h2>
-
+ 
+  <h3 class="text-center mb-4">Class & Section Management</h3>
+ 
   <!-- CREATE CLASS -->
   <div class="card p-3 mb-4">
-    <h4>Create Class</h4>
-
+    <h5>Create Class</h5>
     <form [formGroup]="classForm" (ngSubmit)="createClass()">
-
       <input formControlName="className" class="form-control mb-2" placeholder="Class Name">
       <input formControlName="description" class="form-control mb-2" placeholder="Description">
-
       <button class="btn btn-primary">Create Class</button>
     </form>
   </div>
-
+ 
   <!-- CREATE SECTION -->
   <div class="card p-3 mb-4">
-    <h4>Create Section</h4>
-
+    <h5>Create Section</h5>
+ 
     <form [formGroup]="sectionForm" (ngSubmit)="createSection()">
-
-      <input formControlName="classId" class="form-control mb-2" placeholder="Class ID">
-
+ 
+      <!-- CLASS DROPDOWN -->
+      <select formControlName="classId"
+              class="form-select mb-2"
+              (change)="onClassChange(sectionForm.value.classId)">
+        <option value="">Select Class</option>
+        <option *ngFor="let c of allClasses" [value]="c.classId">
+          {{ c.className }}
+        </option>
+      </select>
+ 
       <input formControlName="sectionName" class="form-control mb-2" placeholder="Section Name">
       <input formControlName="capacity" class="form-control mb-2" placeholder="Capacity">
-
+ 
       <button class="btn btn-success">Create Section</button>
     </form>
   </div>
-
+ 
+  <!-- SECTIONS TABLE -->
+  <div class="card p-3 mb-4" *ngIf="allSections.length">
+    <h5>Sections</h5>
+ 
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Section Name</th>
+          <th>Capacity</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of allSections">
+          <td>{{ s.sectionName }}</td>
+          <td>{{ s.capacity }}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" (click)="setUpdate(s)">Edit</button>
+            <button class="btn btn-sm btn-danger" (click)="deleteSection(s.sectionId)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+ 
   <!-- UPDATE SECTION -->
-  <div class="card p-3 mb-4">
-    <h4>Update Section</h4>
-
+  <div class="card p-3" *ngIf="updateSectionForm.value.sectionId">
+    <h5>Update Section</h5>
     <form [formGroup]="updateSectionForm" (ngSubmit)="updateSection()">
-
-      <input formControlName="sectionId" class="form-control mb-2" placeholder="Section ID">
-
-      <input formControlName="sectionName" class="form-control mb-2" placeholder="New Section Name">
-      <input formControlName="capacity" class="form-control mb-2" placeholder="New Capacity">
-
-      <button class="btn btn-warning">Update Section</button>
+      <input formControlName="sectionName" class="form-control mb-2">
+      <input formControlName="capacity" class="form-control mb-2">
+      <button class="btn btn-warning">Update</button>
     </form>
   </div>
-
-  <!-- DELETE SECTION -->
-  <div class="card p-3">
-    <h4>Delete Section</h4>
-
-    <input #sid class="form-control mb-2" placeholder="Section ID to delete">
-
-    <button class="btn btn-danger w-100" (click)="deleteSection(+sid.value)">
-      Delete Section
-    </button>
-  </div>
-
+ 
 </div>

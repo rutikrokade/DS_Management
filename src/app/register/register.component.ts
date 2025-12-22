@@ -9,41 +9,64 @@ import { HttpClientModule } from '@angular/common/http';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule],  // ⭐ REQUIRED
   templateUrl: './register.component.html'
+  
 })
 export class RegisterComponent implements OnInit {
- 
+
   registerForm!: FormGroup;
- 
   roles = ['ADMIN', 'PARENT', 'TEACHER', 'STUDENT'];
- 
-  constructor(private fb: FormBuilder, private registerService: registerService) {}
- 
+
+  // 🔥 popup states
+  showPopup = false;
+  popupMessage = '';
+
+  constructor(
+    private fb: FormBuilder,
+    private registerService: registerService
+  ) {}
+
   ngOnInit(): void {
     this.registerForm = this.fb.group({
-      username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
       role: ['', Validators.required]
     });
   }
- 
+
   registerUser() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
- 
-    this.registerService.registerUser(this.registerForm.value).subscribe(
-      (res: any) => {
-        alert("User Created Successfully!");
-        console.log(res);
+
+    const payload = {
+      ...this.registerForm.value,
+      username: this.registerForm.value.email
+    };
+
+    console.log('REGISTER PAYLOAD 👉', payload);
+
+    this.registerService.registerUser(payload).subscribe({
+      next: () => {
+        this.popupMessage = '✅ User created successfully! Please wait for admin approval.';
+        this.showPopup = true;
         this.registerForm.reset();
+
+        // ⏱️ auto close after 3 sec
+        setTimeout(() => {
+          this.showPopup = false;
+        }, 3000);
       },
-      (error: any) => {
-        alert("Something went wrong!");
-        console.error(error);
+      error: (error) => {
+        this.popupMessage = '❌ Registration failed. Try again.';
+        this.showPopup = true;
+
+        setTimeout(() => {
+          this.showPopup = false;
+        }, 3000);
+
+        console.error('Registration failed', error);
       }
-    );
+    });
   }
 }
- 

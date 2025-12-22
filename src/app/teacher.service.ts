@@ -1,9 +1,22 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+ 
+export interface TeacherCreateRequest {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  qualification: string;
+  gender: string;
+  dateOfBirth: string;
+  assignedClasses?: string;
+  experienceYears?: number;
+}
+ 
+ 
 export interface TeacherDto {
-  userId: number;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -12,36 +25,18 @@ export interface TeacherDto {
   experienceYears: number;
   gender: string;
   dateOfBirth: string;
-  classIds?: number[];
-  sectionIds?: number[];
-  assignedAsClassTeacher?: boolean;
-  classTeacherId?: number;
 }
-
+ 
 @Injectable({
   providedIn: 'root'
 })
 export class TeacherService {
-
   private baseUrl = 'http://localhost:8090/api/teacher';
-
-  constructor(private http: HttpClient) { }
-
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token'); // login नंतर token save केला असेल
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
-  addTeacher(teacher: TeacherDto): Observable<any> {
-    const headers = this.getAuthHeaders();
-    return this.http.post(this.baseUrl, teacher, { headers });
-  }
-
-  getTeachers(): Observable<TeacherDto[]> {
-    const headers = this.getAuthHeaders();
-    return this.http.get<TeacherDto[]>(this.baseUrl, { headers });
+ 
+  constructor(private http: HttpClient) {}
+ 
+  createTeacher(request: TeacherCreateRequest): Observable<TeacherDto> {
+    return this.http.post<TeacherDto>(this.baseUrl, request);
   }
 }
+ 

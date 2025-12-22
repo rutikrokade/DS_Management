@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class registerService {
+
   private baseUrl = 'http://localhost:8090/api/user';
 
   constructor(
@@ -20,24 +21,25 @@ export class registerService {
     return this.http.post(`${this.baseUrl}/create`, data, { headers });
   }
 
-  // ⭐ GET ALL USERS — ADMIN TOKEN REQUIRED
+  // ⭐ GET ALL USERS
   getAllUsers(): Observable<any> {
     const headers = this.getAuthHeader();
     return this.http.get(`${this.baseUrl}/all`, { headers });
   }
 
-  // ⭐ UPDATE STATUS — ADMIN TOKEN REQUIRED
+  // ⭐ UPDATE STATUS
   updateStatus(id: number, status: string, approved: boolean): Observable<any> {
     const headers = this.getAuthHeader().set('Content-Type', 'application/json');
     const body = { status, approved };
     return this.http.put(`${this.baseUrl}/status/${id}`, body, { headers });
   }
 
+  // 🔥 SINGLE SOURCE OF TOKEN
   private getAuthHeader(): HttpHeaders {
     let headers = new HttpHeaders();
 
     if (this.isBrowser()) {
-      const token = localStorage.getItem('adminToken'); // ⭐ ADMIN token
+      const token = localStorage.getItem('token'); // ✅ FIXED
       if (token) {
         headers = headers.set('Authorization', `Bearer ${token}`);
       }
