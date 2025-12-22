@@ -1,0 +1,4 @@
+.table-yellow th {
+  background: linear-gradient(135deg, #ffc107, #ffcd39);
+  font-weight: 600;
+}
