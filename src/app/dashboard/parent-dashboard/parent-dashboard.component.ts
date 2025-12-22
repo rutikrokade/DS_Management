@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 import { ChatboatComponent } from "../../pages/chatboat/chatboat.component";
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-parent-dashboard',
@@ -11,4 +12,9 @@ import { ChatboatComponent } from "../../pages/chatboat/chatboat.component";
 })
 export class ParentDashboardComponent {
 
+  constructor(private authService: AuthService) {}
+
+  logout() {
+    this.authService.logout();
+  }
 }

@@ -1,77 +1,105 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ParentService } from '../../../parent.service';
 
 @Component({
   selector: 'app-parent-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './parent-management.component.html',
-  styleUrls: ['./parent-management.component.css']
+  styleUrl: './parent-management.component.css'
 })
-export class ParentManagementComponent {
-  parents: any[] = [
-    { id: 1, name: 'Rahul Sharma', childName: 'Aarav Sharma', contact: '9876543210', email: 'rahul@gmail.com', address: 'Pune', relation: 'Father' },
-  ];
+export class ParentManagementComponent implements OnInit {
+
+  parentForm!: FormGroup;
+  parents: any[] = [];
 
   showForm = false;
-  isEdit = false;
-  message = '';
-  parentData: any = { id: '', name: '', childName: '', contact: '', email: '', address: '', relation: '' };
-studentData: any;
+  successMsg = '';
+  errorMsg = '';
 
-  toggleForm() {
-    this.showForm = !this.showForm;
-    this.isEdit = false;
-    this.message = '';
-    this.parentData = { id: '', name: '', childName: '', contact: '', email: '', address: '', relation: '' };
+  relationships = ['FATHER', 'MOTHER', 'GUARDIAN'];
+
+  constructor(
+    private fb: FormBuilder,
+    private parentService: ParentService
+  ) {
+    this.parentForm = this.fb.group({
+      userId: ['', Validators.required],
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      address: ['', Validators.required],
+      relationship: ['', Validators.required]
+    });
   }
 
- saveParent() {
-  const mobileRegex = /^[0-9]{10}$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!this.parentData.name || !this.parentData.childName || !this.parentData.contact ||
-      !this.parentData.email || !this.parentData.address || !this.parentData.relation) {
-    this.message = 'Please fill all the fields!';
-    return;
+  ngOnInit(): void {
+    this.loadParents();
   }
 
-  if (!mobileRegex.test(this.parentData.contact)) {
-    this.message = 'Please enter a valid 10-digit mobile number!';
-    return;
+  // 🔹 Load parent list
+  loadParents() {
+    this.parentService.getAllParents().subscribe({
+      next: res => this.parents = res,
+      error: () => this.errorMsg = 'Failed to load parents'
+    });
   }
 
-  if (!emailRegex.test(this.parentData.email)) {
-    this.message = 'Please enter a valid email!';
-    return;
-  }
-
-  if (this.isEdit) {
-    const index = this.parents.findIndex(p => p.id === this.parentData.id);
-    if (index !== -1) this.parents[index] = { ...this.parentData };
-    this.message = 'Parent details updated successfully!';
-  } else {
-    this.parentData.id = this.parents.length + 1;
-    this.parents.push({ ...this.parentData });
-    this.message = 'Parent added successfully!';
-  }
-  this.toggleForm();
-}
-
-
-
-  editParent(parent: any) {
-    this.parentData = { ...parent };
+  // 🔹 Open add form
+  openForm() {
     this.showForm = true;
-    this.isEdit = true;
+    this.parentForm.reset();
+    this.successMsg = '';
+    this.errorMsg = '';
   }
 
-  deleteParent(id: number) {
-    const confirmDelete = confirm('Are you sure you want to delete this parent?');
-    if (confirmDelete) {
-      this.parents = this.parents.filter(p => p.id !== id);
-      this.message = 'Parent deleted successfully!';
+  // 🔹 Close add form
+  closeForm() {
+    this.showForm = false;
+  }
+
+  // 🔹 Submit form
+  submit() {
+    if (this.parentForm.invalid) {
+      this.parentForm.markAllAsTouched();
+      return;
     }
+
+    this.parentService.createParent(this.parentForm.value).subscribe({
+      next: () => {
+        this.successMsg = 'Parent added successfully ✅';
+        this.errorMsg = '';
+        this.showForm = false;
+        this.loadParents();
+      },
+      error: err => {
+        this.errorMsg = err?.error?.error || 'Failed to add parent';
+        this.successMsg = '';
+      }
+    });
+  }
+
+  // 🔹 DELETE parent (FIXED)
+  deleteParent(id: number) {
+    if (!confirm('Are you sure you want to delete this parent?')) {
+      return;
+    }
+
+    this.parentService.deleteParent(id).subscribe({
+      next: () => {
+        // ✅ remove from table instantly
+        this.parents = this.parents.filter(p => p.parentId !== id);
+        alert('Parent deleted successfully ✅');
+      },
+      error: err => {
+        alert(
+          err?.error?.error ||
+          err?.error ||
+          'Delete failed. Parent may be linked with student.'
+        );
+      }
+    });
   }
 }
