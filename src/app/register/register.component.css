@@ -1,0 +1,35 @@
+.form-control {
+  padding-right: 40px; /* 👁 icon ke liye space */
+}
+
+.password-eye {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #555;
+}
+
+.password-eye:hover {
+  color: #000;
+}
+
+.main-card {
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;   /* ⭐ THIS LINE FIXES IT */
+  font-size: 12px;
+  cursor: pointer;
+  color: #555;
+}
+
+.close-btn:hover {
+  color: #000;
+}
+

@@ -2,3 +2,13 @@
   background: linear-gradient(135deg, #ffc107, #ffcd39);
   font-weight: 600;
 }
+.custom-yellow {
+  background-color: #ffc107;
+  color: #000;
+  font-weight: 600;
+}
+
+.custom-yellow:hover {
+  background-color: #e0a800;
+}
+
