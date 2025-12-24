@@ -1,28 +1,38 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { registerService } from '../register.service';
 import { HttpClientModule } from '@angular/common/http';
- 
+import { Router, RouterModule } from '@angular/router';
+import { registerService } from '../register.service';
+
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],  // ⭐ REQUIRED
-  templateUrl: './register.component.html'
-  
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    RouterModule
+  ],
+  templateUrl: './register.component.html',
+  styleUrls:['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
 
   registerForm!: FormGroup;
   roles = ['ADMIN', 'PARENT', 'TEACHER', 'STUDENT'];
 
-  // 🔥 popup states
+  // 👁 password toggle (ONLY ONCE)
+  showPassword = false;
+
+  // 🔥 popup
   showPopup = false;
   popupMessage = '';
 
   constructor(
     private fb: FormBuilder,
-    private registerService: registerService
+    private registerService: registerService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -31,6 +41,16 @@ export class RegisterComponent implements OnInit {
       password: ['', Validators.required],
       role: ['', Validators.required]
     });
+  }
+
+  // 👁 SHOW / HIDE PASSWORD
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  // ❌ CROSS BUTTON → STATUS PAGE
+  goStatus() {
+    this.router.navigate(['/status']);
   }
 
   registerUser() {
@@ -52,19 +72,13 @@ export class RegisterComponent implements OnInit {
         this.showPopup = true;
         this.registerForm.reset();
 
-        // ⏱️ auto close after 3 sec
-        setTimeout(() => {
-          this.showPopup = false;
-        }, 3000);
+        setTimeout(() => this.showPopup = false, 3000);
       },
       error: (error) => {
         this.popupMessage = '❌ Registration failed. Try again.';
         this.showPopup = true;
 
-        setTimeout(() => {
-          this.showPopup = false;
-        }, 3000);
-
+        setTimeout(() => this.showPopup = false, 3000);
         console.error('Registration failed', error);
       }
     });

@@ -309,6 +309,38 @@
 .tree-silhouette {
   display: none;
 }
+.main-card {
+  position: relative;
+}
+
+/* ❌ Cross Button */
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;     /* ⭐ right side */
+  font-size: 20px;
+  cursor: pointer;
+  color: #555;
+}
+
+.close-btn:hover {
+  color: #000;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 18px;
+}
+
+.password-toggle:hover {
+  color: #000;
+}
+
+
 }
 
 

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { registerService } from '../register.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-status',
@@ -10,12 +11,16 @@ import { registerService } from '../register.service';
 })
 export class StatusComponent implements OnInit {
 
+
   users: any[] = [];
 
-  constructor(private registerService: registerService) {}
+  constructor(private registerService: registerService,private router: Router) {}
 
   ngOnInit(): void {
     this.loadUsers();
+  }
+   goToLogin() {
+    this.router.navigate(['/login']); // ✅ redirect works now
   }
 
   loadUsers() {

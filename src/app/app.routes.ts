@@ -75,6 +75,7 @@ import { StatusComponent } from './status/status.component';
 
 import { RegisterComponent } from './register/register.component';
 import { authGuard } from './guards/auth.guard';
+import { FeeManagementComponent } from './dashboard/admin-dashboard/fee-management/fee-management.component';
 import { SubjectNameComponent } from './dashboard/teacher-dashboard/subject-name/subject-name.component';
 
 
@@ -102,6 +103,7 @@ export const routes: Routes = [
     { path: 'student-management', component: StudentManagementComponent },
     { path: 'parent-management', component: ParentManagementComponent },
     { path: 'exam-planner', component: ExamPlannerComponent },
+    { path:  'fee-management', component: FeeManagementComponent },
     { path: 'content-management', component: ContentManagementComponent },
     { path: 'class-Section', component: ClassSectionComponent },
   ]
@@ -184,6 +186,7 @@ export const routes: Routes = [
      {path:'admission',component:AdmissionComponent},
       {path:'blog',component:BlogComponent},
       {path:'courses',component:CoursesComponent},
+      
  
   // {path:'courses',component:CoursesComponent},
  {path:'terms-condition',component:TermsConditionComponent},
