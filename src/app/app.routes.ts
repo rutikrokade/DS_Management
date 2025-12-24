@@ -75,6 +75,7 @@ import { StatusComponent } from './status/status.component';
 
 import { RegisterComponent } from './register/register.component';
 import { authGuard } from './guards/auth.guard';
+import { SubjectNameComponent } from './dashboard/teacher-dashboard/subject-name/subject-name.component';
 
 
 export const routes: Routes = [
@@ -156,6 +157,8 @@ export const routes: Routes = [
     { path: 'manage-student', component: ManageStudentComponent },
     { path: 'student-progress', component: StudentProgressComponent },
     { path: 'timetable', component: TimetableComponent },
+    { path: 'subjectname', component: SubjectNameComponent},
+
   ]
 },
 

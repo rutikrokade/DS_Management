@@ -1,0 +1,28 @@
+<div class="container mt-4">
+  <h4 class="mb-3">My Subjects</h4>
+
+  <table class="table table-bordered table-hover text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>Subject Name</th>
+        <th>Code</th>
+        <th>Class</th>
+        <th>Description</th>
+        <th>Max Marks</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of subjects">
+        <td>{{ s.subjectName }}</td>
+        <td>{{ s.subjectCode }}</td>
+        <td>{{ s.className }}</td>
+        <td>{{ s.description }}</td>
+        <td>{{ s.maxMarks }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="subjects.length === 0" class="text-center text-muted">
+    No subjects assigned
+  </div>
+</div>

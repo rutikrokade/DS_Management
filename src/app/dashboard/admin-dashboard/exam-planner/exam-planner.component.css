@@ -1,16 +1,154 @@
-h2 {
-  font-weight: 700;
+/* ================= PAGE WRAPPER ================= */
+.exam-page {
+  padding: 1.5rem;
+  background: #f8f9fa;
 }
 
-.table thead th {
+/* ================= HEADER ================= */
+.exam-page .exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.exam-page .page-title {
+  font-weight: 600;
+  color: #2c2c2c;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ================= TABLE CARD ================= */
+.exam-page .exam-table {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.exam-page .exam-table table {
+  margin-bottom: 0;
+}
+
+.exam-page .table-header th {
   background-color: #fff3cd;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.exam-page .exam-table td {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+.exam-page .exam-table tbody tr:hover {
+  background-color: #fff9e6;
+}
+
+/* ================= FORM OVERLAY ================= */
+.exam-page .form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+/* ================= FORM CARD ================= */
+.exam-page .exam-form {
+  width: 100%;
+  max-width: 900px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1.25rem;
+}
+
+/* ================= FORM HEADER ================= */
+.exam-page .form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.exam-page .form-header h5 {
+  margin: 0;
   font-weight: 600;
 }
 
-.table tbody tr:hover {
-  background-color: #fff8e1;
+.exam-page .close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
 }
 
-.btn-outline-primary, .btn-outline-danger {
-  border-radius: 8px;
+/* ================= FORM LABELS ================= */
+.exam-page .form-label {
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 0.25rem;
+}
+
+/* ================= INPUTS ================= */
+.exam-page .form-control,
+.exam-page .form-select {
+  border-radius: 6px;
+}
+
+.exam-page .form-control:focus,
+.exam-page .form-select:focus {
+  border-color: #f5b400;
+  box-shadow: 0 0 0 0.15rem rgba(245, 180, 0, 0.25);
+}
+
+/* ================= SAVE BUTTON ================= */
+.exam-page .btn-warning {
+  background-color: #f5b400;
+  border-color: #f5b400;
+}
+
+.exam-page .btn-warning:hover {
+  background-color: #e0a800;
+  border-color: #e0a800;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .exam-page .exam-form {
+    max-width: 95%;
+  }
+}
+/* FORM GROUP FIX */
+.exam-page .row.g-3 > [class^="col-"] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* LABEL FIX */
+.exam-page .form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+/* SELECT / INPUT FIX */
+.exam-page .form-select,
+.exam-page .form-control {
+  height: 38px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+/* DISABLED FIELD */
+.exam-page input[disabled] {
+  background-color: #f1f1f1;
 }

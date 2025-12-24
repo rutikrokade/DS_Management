@@ -1,91 +1,264 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-interface Exam {
-  id?: number;
-  name: string;
-  subject: string;
-  date: string;
-  time: string;
-  duration: string;
-  class: string;
-}
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ExamService } from '../../../exam.service';
 
 @Component({
   selector: 'app-exam-planner',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './exam-planner.component.html',
-  styleUrl: './exam-planner.component.css'
+  styleUrls: ['./exam-planner.component.css']
 })
-export class ExamPlannerComponent {
-  // Exam List
-  exams: Exam[] = [
-    { id: 1, name: 'Midterm Math Exam', subject: 'Mathematics', date: '2023-10-15', time: '10:00 AM', duration: '2 hours', class: 'Grade 10' },
-    { id: 2, name: 'Science Final', subject: 'Science', date: '2023-11-20', time: '9:00 AM', duration: '3 hours', class: 'Grade 9' },
-    { id: 3, name: 'English Quiz', subject: 'English', date: '2023-09-25', time: '11:00 AM', duration: '1 hour', class: 'Grade 8' }
-  ];
+export class ExamPlannerComponent implements OnInit {
 
-  // New or Editing Exam
-  newExam: Exam = { name: '', subject: '', date: '', time: '', duration: '', class: '' };
+  // ===============================
+  // STATE
+  // ===============================
+  exams: any[] = [];
+  classes: any[] = [];
+  sections: any[] = [];
+  subjects: any[] = [];
 
-  // Control modal state
-  showExamModal = false;
+  showForm = false;
+  isEdit = false;
+  examId = 0;
 
-  // Edit mode flag
-  isEditMode = false;
+  // ===============================
+  // FORM
+  // ===============================
+  examForm = this.fb.group({
+    examName: ['', Validators.required],
+    classId: ['', Validators.required],
+    sectionId: ['', Validators.required],
+    subjectId: ['', Validators.required],
+    teacherId: ['', Validators.required],
+    term: ['', Validators.required],
+    examType: ['ONLINE', Validators.required],
+    startTime: ['', Validators.required],
+    endTime: ['', Validators.required],
+    duration: [{ value: '', disabled: true }], // AUTO
+    totalMarks: ['', Validators.required]
+  });
 
-  // Selected index for edit
-  selectedIndex: number | null = null;
+  constructor(
+    private fb: FormBuilder,
+    private examService: ExamService
+  ) {}
 
-  // ✅ Open modal for adding a new exam
-  openAddExamModal() {
-    this.isEditMode = false;
-    this.resetForm();
-    this.showExamModal = true;
+  // ===============================
+  // INIT
+  // ===============================
+  ngOnInit(): void {
+    this.loadExams();
+    this.loadClasses();
+
+    // AUTO DURATION CALC
+    this.examForm.get('startTime')?.valueChanges.subscribe(() => {
+      this.calculateDuration();
+    });
+
+    this.examForm.get('endTime')?.valueChanges.subscribe(() => {
+      this.calculateDuration();
+    });
   }
 
-  // ✅ Open modal for editing an existing exam
-  openEditExamModal(exam: Exam, index: number) {
-    this.isEditMode = true;
-    this.selectedIndex = index;
-    this.newExam = { ...exam };
-    this.showExamModal = true;
+  // ===============================
+  // LOAD EXAMS
+  // ===============================
+  loadExams() {
+    this.examService.getExams().subscribe({
+      next: res => this.exams = res,
+      error: err => console.error('Load exams error', err)
+    });
   }
 
-  // ✅ Close modal
-  closeExamModal() {
-    this.showExamModal = false;
-    this.resetForm();
+  // ===============================
+  // LOAD CLASSES
+  // ===============================
+  loadClasses() {
+    this.examService.getClasses().subscribe({
+      next: res => this.classes = res,
+      error: err => console.error('Load classes error', err)
+    });
   }
 
-  // ✅ Add or Update Exam
-  saveExam() {
-    if (this.newExam.name.trim() === '') return;
+  // ===============================
+  // CLASS CHANGE → LOAD SECTIONS
+  // ===============================
+  onClassChange(event: Event) {
+    const classId = Number((event.target as HTMLSelectElement).value);
 
-    if (this.isEditMode && this.selectedIndex !== null) {
-      // Update exam
-      this.exams[this.selectedIndex] = { ...this.newExam };
+    this.sections = [];
+    this.subjects = [];
+
+    this.examForm.patchValue({
+      sectionId: '',
+      subjectId: ''
+    });
+
+    if (!classId) return;
+
+    this.examService.getSectionsByClass(classId).subscribe({
+      next: res => this.sections = res,
+      error: err => console.error('Load sections error', err)
+    });
+  }
+
+  // ===============================
+  // SECTION CHANGE → LOAD SUBJECTS
+  // ===============================
+  onSectionChange() {
+    // ⚠️ Backend me section-wise subject API nahi hai
+    // Isliye all subjects load kar rahe hain
+    this.examService.getSubjects().subscribe({
+      next: res => this.subjects = res,
+      error: err => console.error('Load subjects error', err)
+    });
+  }
+
+  // ===============================
+  // OPEN CREATE FORM
+  // ===============================
+  openCreateForm() {
+    this.showForm = true;
+    this.isEdit = false;
+    this.examId = 0;
+
+    this.sections = [];
+    this.subjects = [];
+
+    this.examForm.reset({
+      examType: 'ONLINE'
+    });
+  }
+
+  // ===============================
+  // EDIT EXAM
+  // ===============================
+  editExam(exam: any) {
+    this.showForm = true;
+    this.isEdit = true;
+    this.examId = exam.examId;
+
+    this.examForm.patchValue({
+      examName: exam.examName,
+      classId: exam.classId,
+      sectionId: exam.sectionId,
+      subjectId: exam.subjectId,
+      teacherId: exam.teacherId,
+      term: 'Mid Term', // backend se nahi aa raha
+      examType: exam.examType,
+      startTime: this.formatForInput(exam.startTime),
+      endTime: this.formatForInput(exam.endTime),
+      totalMarks: exam.totalMarks
+    });
+
+    // Load sections & subjects for edit mode
+    this.examService.getSectionsByClass(exam.classId).subscribe(res => {
+      this.sections = res;
+    });
+
+    this.examService.getSubjects().subscribe(res => {
+      this.subjects = res;
+    });
+
+    setTimeout(() => this.calculateDuration());
+  }
+
+  // ===============================
+  // CALCULATE DURATION
+  // ===============================
+  private calculateDuration() {
+    const start = this.examForm.get('startTime')?.value;
+    const end = this.examForm.get('endTime')?.value;
+
+    if (!start || !end) {
+      this.examForm.get('duration')?.setValue('');
+      return;
+    }
+
+    const startTime = new Date(start).getTime();
+    const endTime = new Date(end).getTime();
+
+    if (endTime > startTime) {
+      const diffMinutes = Math.floor(
+        (endTime - startTime) / (1000 * 60)
+      );
+
+      this.examForm.get('duration')?.setValue(diffMinutes.toString());
+      this.examForm.get('endTime')?.setErrors(null);
     } else {
-      // Add new exam
-      this.newExam.id = this.exams.length + 1;
-      this.exams.push({ ...this.newExam });
-    }
-
-    this.closeExamModal();
-  }
-
-  // ✅ Delete Exam
-  deleteExam(index: number) {
-    if (confirm('Are you sure you want to delete this exam?')) {
-      this.exams.splice(index, 1);
+      this.examForm.get('duration')?.setValue('');
+      this.examForm.get('endTime')?.setErrors({ invalidTime: true });
     }
   }
 
-  // ✅ Reset form
-  resetForm() {
-    this.newExam = { name: '', subject: '', date: '', time: '', duration: '', class: '' };
-    this.selectedIndex = null;
+  // ===============================
+  // SUBMIT (CREATE / UPDATE)
+  // ===============================
+  submitExam() {
+    if (this.examForm.invalid) return;
+
+    const payload = {
+      ...this.examForm.getRawValue(),
+      startTime: this.toBackendDateTime(this.examForm.value.startTime!),
+      endTime: this.toBackendDateTime(this.examForm.value.endTime!)
+    };
+
+    if (this.isEdit) {
+      this.examService.updateExam(this.examId, payload).subscribe({
+        next: () => {
+          alert('Exam updated successfully');
+          this.afterSuccess();
+        },
+        error: err => console.error('Update error', err)
+      });
+    } else {
+      this.examService.createExam(payload).subscribe({
+        next: () => {
+          alert('Exam created successfully');
+          this.afterSuccess();
+        },
+        error: err => console.error('Create error', err)
+      });
+    }
+  }
+
+  // ===============================
+  // DELETE
+  // ===============================
+  deleteExam(id: number) {
+    if (!confirm('Are you sure you want to delete this exam?')) return;
+
+    this.examService.deleteExam(id).subscribe({
+      next: () => this.loadExams(),
+      error: err => console.error('Delete error', err)
+    });
+  }
+
+  // ===============================
+  // CLOSE FORM
+  // ===============================
+  closeForm() {
+    this.showForm = false;
+    this.isEdit = false;
+    this.examId = 0;
+  }
+
+  afterSuccess() {
+    this.closeForm();
+    this.loadExams();
+  }
+
+  // ===============================
+  // DATE HELPERS
+  // ===============================
+  private formatForInput(dateTime: string): string {
+    return dateTime ? dateTime.substring(0, 16) : '';
+  }
+
+  private toBackendDateTime(value: string): string {
+    return value && value.length === 16 ? value + ':00' : value;
   }
 }
